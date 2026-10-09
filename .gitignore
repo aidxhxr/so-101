@@ -1,6 +1,10 @@
 __pycache__/
 *.pyc
 .venv/
+*.egg-info/
 outputs/
 wandb/
 *.mp4
+.env
+.pytest_cache/
+.ruff_cache/

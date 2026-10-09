@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "so101"
+version = "0.2.0"
+description = "SmolVLA imitation learning on an SO-101 arm: teleop, recording, fine-tuning, offline and on-robot evaluation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "torch>=2.5",
+    "lerobot[dataset,smolvla]>=0.6",
+    "huggingface_hub>=0.30",
+    "python-dotenv>=1.0",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+robot = ["lerobot[feetech]>=0.6"]
+plots = ["matplotlib>=3.8"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+so101 = "so101.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["so101*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
