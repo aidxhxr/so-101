@@ -74,6 +74,16 @@ def save_checkpoint(policy, preprocessor, postprocessor, path: str | Path) -> Pa
     return path
 
 
+def load_for_eval(checkpoint: str | Path, ds_meta, device: str):
+    """Load a fine-tuned checkpoint directory, or build an un-fine-tuned Hub model (e.g. ``lerobot/smolvla_base``)
+    normalized with this dataset's statistics so zero-shot and fine-tuned policies are scored identically."""
+    if Path(checkpoint).is_dir():
+        return load_checkpoint(checkpoint, device)
+    policy, pre, post = build_from_pretrained(str(checkpoint), ds_meta, device, True, True)
+    policy.eval()
+    return policy, pre, post
+
+
 def param_counts(policy) -> dict[str, int]:
     trainable = sum(p.numel() for p in policy.parameters() if p.requires_grad)
     total = sum(p.numel() for p in policy.parameters())

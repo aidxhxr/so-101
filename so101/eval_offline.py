@@ -22,7 +22,7 @@ import torch
 
 from so101.data import images_to_float, make_dataset, make_loader, split_episodes
 from so101.metrics import RunningMean, hold_baseline, masked_chunk_errors, mean_action_baseline
-from so101.policy import load_checkpoint
+from so101.policy import load_for_eval
 
 
 def _stats_tensors(meta, key: str) -> tuple[torch.Tensor, torch.Tensor]:
@@ -37,7 +37,7 @@ def score_checkpoint(
     from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
 
     meta = LeRobotDatasetMetadata(repo_id)
-    policy, preprocessor, _ = load_checkpoint(checkpoint, device)
+    policy, preprocessor, _ = load_for_eval(checkpoint, meta, device)
     norm_mode = str(policy.config.normalization_mapping.get("ACTION", ""))
     if "MEAN_STD" not in norm_mode:
         raise RuntimeError(f"expected MEAN_STD action normalization, got {norm_mode}")

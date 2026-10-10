@@ -14,14 +14,14 @@ import time
 import torch
 
 from so101.data import images_to_float, make_dataset
-from so101.policy import gpu_name, load_checkpoint
+from so101.policy import gpu_name, load_for_eval
 
 
 def bench(checkpoint: str, repo_id: str, device: str, iters: int, warmup: int, amp: bool) -> dict:
     from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
 
-    policy, preprocessor, postprocessor = load_checkpoint(checkpoint, device)
     meta = LeRobotDatasetMetadata(repo_id)
+    policy, preprocessor, postprocessor = load_for_eval(checkpoint, meta, device)
     ds = make_dataset(repo_id, [0], policy.config, meta)
     sample = ds[0]
     obs = {k: v.unsqueeze(0) for k, v in sample.items() if hasattr(v, "unsqueeze") and k != "action"}
