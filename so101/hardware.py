@@ -21,6 +21,7 @@ def follower_config(hw: HardwareConfig, with_cameras: bool = True):
     return SO101FollowerConfig(
         port=hw.follower_port,
         id=hw.follower_id,
+        use_degrees=hw.use_degrees,
         cameras=camera_configs(hw) if with_cameras else {},
     )
 
@@ -28,7 +29,7 @@ def follower_config(hw: HardwareConfig, with_cameras: bool = True):
 def leader_config(hw: HardwareConfig):
     from lerobot.teleoperators.so_leader import SO101LeaderConfig
 
-    return SO101LeaderConfig(port=hw.leader_port, id=hw.leader_id)
+    return SO101LeaderConfig(port=hw.leader_port, id=hw.leader_id, use_degrees=hw.use_degrees)
 
 
 def make_follower(hw: HardwareConfig, with_cameras: bool = True):

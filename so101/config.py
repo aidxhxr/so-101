@@ -33,6 +33,10 @@ class HardwareConfig:
     camera_height: int = 480
     front_camera: int = 0
     wrist_camera: int = 2
+    # lerobot >= 0.6 reports joints in degrees by default. Datasets recorded with older releases
+    # (including lerobot/svla_so101_pickplace) use the -100..100 range, so a policy trained on them
+    # must be deployed with use_degrees=false. Record, train and deploy with one setting.
+    use_degrees: bool = True
 
     def cameras(self) -> dict[str, dict[str, Any]]:
         common = {"width": self.camera_width, "height": self.camera_height, "fps": self.fps}
