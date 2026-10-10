@@ -71,6 +71,8 @@ def train(cfg: TrainConfig, data: DatasetConfig) -> Path:
 
     meta = LeRobotDatasetMetadata(data.repo_id)
     train_eps, val_eps = split_episodes(meta.total_episodes, data.val_fraction, data.split_seed)
+    if data.max_train_episodes:
+        train_eps = train_eps[: data.max_train_episodes]
     policy, preprocessor, postprocessor = build_from_pretrained(
         cfg.pretrained, meta, cfg.device, cfg.freeze_vision_encoder, cfg.train_expert_only
     )

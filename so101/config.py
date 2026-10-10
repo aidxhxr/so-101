@@ -52,6 +52,7 @@ class DatasetConfig:
     fps: int = 30
     val_fraction: float = 0.1
     split_seed: int = 0
+    max_train_episodes: int | None = None
     push_to_hub: bool = True
 
 
@@ -96,7 +97,7 @@ def add_dataclass_args(parser: argparse.ArgumentParser, cls: type, prefix: str =
         default = f.default if f.default is not dataclasses.MISSING else f.default_factory()  # type: ignore[misc]
         if f.type in ("bool", bool):
             parser.add_argument(name, type=_str2bool, default=default, metavar="{true,false}")
-        elif f.type in ("int", int):
+        elif f.type in ("int", int, "int | None"):
             parser.add_argument(name, type=int, default=default)
         elif f.type in ("float", float):
             parser.add_argument(name, type=float, default=default)
