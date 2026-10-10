@@ -14,6 +14,7 @@ COMMANDS = {
     "deploy": ("so101.robot_eval", "Run closed-loop trials on the arm and log successes"),
     "trajectory": ("so101.trajectory", "Dump open-loop chunk predictions for one episode"),
     "plot": ("so101.plots", "Render training curves and prediction figures"),
+    "report": ("so101.report", "Print the README result tables from results/"),
 }
 
 
