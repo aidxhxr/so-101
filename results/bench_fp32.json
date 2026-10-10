@@ -1,0 +1,14 @@
+{
+  "checkpoint": "outputs/main/final",
+  "device": "NVIDIA GeForce RTX 5090",
+  "autocast_bf16": false,
+  "iters": 300,
+  "chunk_size": 50,
+  "n_action_steps": 50,
+  "denoise_steps": 10,
+  "latency_ms_p50": 116.69,
+  "latency_ms_p95": 119.62,
+  "latency_ms_max": 127.51,
+  "chunks_per_s": 8.57,
+  "actions_per_s_if_full_chunk_executed": 428.5
+}

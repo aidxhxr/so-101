@@ -1,0 +1,76 @@
+{
+  "so101_version": "0.2.0",
+  "git_sha": "e9110f0",
+  "torch": "2.11.0+cu130",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "dataset": {
+    "repo_id": "lerobot/svla_so101_pickplace",
+    "episodes": 50,
+    "frames": 11939,
+    "fps": 30,
+    "train_episodes": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "val_episodes": [
+      1,
+      14,
+      28,
+      36,
+      43
+    ],
+    "train_frames": 2235,
+    "val_frames": 1248,
+    "camera_keys": [
+      "observation.images.up",
+      "observation.images.side"
+    ]
+  },
+  "params": {
+    "trainable": 99880992,
+    "total": 450046176
+  },
+  "train": {
+    "pretrained": "lerobot/smolvla_base",
+    "output_dir": "outputs/abl_10_episodes",
+    "steps": 3000,
+    "batch_size": 64,
+    "lr": 0.0001,
+    "min_lr": 2.5e-06,
+    "warmup_steps": 1000,
+    "grad_clip": 10.0,
+    "save_every": 3000,
+    "eval_every": 500,
+    "log_every": 50,
+    "num_workers": 12,
+    "seed": 1000,
+    "freeze_vision_encoder": true,
+    "train_expert_only": true,
+    "device": "cuda",
+    "push_to_hub": null,
+    "resume": null
+  },
+  "data": {
+    "repo_id": "lerobot/svla_so101_pickplace",
+    "task": "Pick up the cube and place it in the box.",
+    "num_episodes": 50,
+    "episode_time_s": 30.0,
+    "reset_time_s": 10.0,
+    "fps": 30,
+    "val_fraction": 0.1,
+    "split_seed": 0,
+    "max_train_episodes": 10,
+    "push_to_hub": true
+  },
+  "started": "2026-10-09T23:47:19",
+  "finished": "2026-10-10T00:13:33",
+  "best_val_mse": 0.3102741539478302
+}
