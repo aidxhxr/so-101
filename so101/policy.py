@@ -79,6 +79,8 @@ def load_for_eval(checkpoint: str | Path, ds_meta, device: str):
     normalized with this dataset's statistics so zero-shot and fine-tuned policies are scored identically."""
     if Path(checkpoint).is_dir():
         return load_checkpoint(checkpoint, device)
+    if str(checkpoint).count("/") != 1 or str(checkpoint).startswith((".", "/")):
+        raise FileNotFoundError(f"{checkpoint} is neither a checkpoint directory nor a Hub id")
     policy, pre, post = build_from_pretrained(str(checkpoint), ds_meta, device, True, True)
     policy.eval()
     return policy, pre, post
