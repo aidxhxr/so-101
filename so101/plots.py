@@ -47,7 +47,14 @@ def plot_training(run_dir: Path, out: Path) -> None:
     fig.savefig(out, dpi=130)
 
 
-def plot_eval(eval_json: Path, out_dir: Path, label_map: dict[str, str] | None = None) -> None:
+def _default_label(checkpoint: str) -> str:
+    parts = Path(checkpoint).parts
+    return "/".join(parts[-2:]) if len(parts) >= 2 and parts[-1] in {"final", "best"} else parts[-1]
+
+
+def plot_eval(
+    eval_json: Path, out_dir: Path, label_map: dict[str, str] | None = None, per_joint_checkpoint: str | None = None
+) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -57,7 +64,7 @@ def plot_eval(eval_json: Path, out_dir: Path, label_map: dict[str, str] | None =
     label_map = label_map or {}
     fig, ax = plt.subplots(figsize=(7, 4))
     for res in results:
-        name = label_map.get(res["checkpoint"], Path(res["checkpoint"]).name)
+        name = label_map.get(res["checkpoint"], _default_label(res["checkpoint"]))
         ax.plot(res["policy"]["raw_mse_per_step"], label=f"SmolVLA ({name})")
     ax.plot(results[0]["hold"]["raw_mse_per_step"], "--", color="gray", label="hold position")
     ax.plot(results[0]["mean"]["raw_mse_per_step"], ":", color="black", label="mean action")
@@ -70,6 +77,8 @@ def plot_eval(eval_json: Path, out_dir: Path, label_map: dict[str, str] | None =
     fig.savefig(out_dir / "eval_horizon.png", dpi=130)
 
     res = results[-1]
+    if per_joint_checkpoint is not None:
+        res = next(r for r in results if r["checkpoint"] == per_joint_checkpoint)
     joints = res["joint_names"]
     fig, ax = plt.subplots(figsize=(8, 4))
     x = range(len(joints))
@@ -80,7 +89,8 @@ def plot_eval(eval_json: Path, out_dir: Path, label_map: dict[str, str] | None =
     ax.set_xticks(list(x))
     ax.set_xticklabels([j.replace(".pos", "") for j in joints], rotation=20)
     ax.set_ylabel("MAE (raw joint units)")
-    ax.set_title("per-joint error over the 50-step chunk, held-out episodes")
+    name = label_map.get(res["checkpoint"], _default_label(res["checkpoint"]))
+    ax.set_title(f"per-joint error over the 50-step chunk, held-out episodes ({name})")
     ax.legend()
     fig.tight_layout()
     fig.savefig(out_dir / "eval_per_joint.png", dpi=130)
@@ -136,6 +146,8 @@ def build_parser(parser: argparse.ArgumentParser | None = None) -> argparse.Argu
     parser = parser or argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", default=None, help="training output dir with train_log.jsonl / val_log.jsonl")
     parser.add_argument("--eval-json", default=None)
+    parser.add_argument("--label", action="append", default=[], metavar="CHECKPOINT=LABEL")
+    parser.add_argument("--per-joint-checkpoint", default=None, help="which eval result the per-joint bars show")
     parser.add_argument("--traj-json", default=None)
     parser.add_argument("--ablation-dir", action="append", default=[], metavar="LABEL=RUN_DIR")
     parser.add_argument("--ablation-max-step", type=int, default=3000)
@@ -150,7 +162,8 @@ def main(argv: list[str] | None = None) -> None:
     if args.run_dir:
         plot_training(Path(args.run_dir), out_dir / "training_curves.png")
     if args.eval_json:
-        plot_eval(Path(args.eval_json), out_dir)
+        labels = dict(item.split("=", 1) for item in args.label)
+        plot_eval(Path(args.eval_json), out_dir, labels, args.per_joint_checkpoint)
     if args.traj_json:
         plot_trajectory(Path(args.traj_json), out_dir / "trajectory.png")
     if args.ablation_dir:
