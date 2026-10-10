@@ -110,11 +110,35 @@ def plot_trajectory(traj_json: Path, out: Path) -> None:
     fig.savefig(out, dpi=130)
 
 
+def plot_ablations(runs: list[tuple[str, Path]], out: Path, max_step: int | None = None) -> None:
+    """Held-out chunk MSE against step for several runs on one axis (the main run truncated to ``max_step``)."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(7, 4))
+    for label, run_dir in runs:
+        val = [r for r in _read_jsonl(run_dir / "val_log.jsonl") if r["step"] > 0]
+        if max_step is not None:
+            val = [r for r in val if r["step"] <= max_step]
+        ax.plot([r["step"] for r in val], [r["mse"] for r in val], "o-", ms=3, label=label)
+    ax.set_xlabel("step")
+    ax.set_ylabel("held-out action-chunk MSE (normalized)")
+    ax.set_yscale("log")
+    ax.set_title("ablations: what to train and how much data")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(out, dpi=130)
+
+
 def build_parser(parser: argparse.ArgumentParser | None = None) -> argparse.ArgumentParser:
     parser = parser or argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", default=None, help="training output dir with train_log.jsonl / val_log.jsonl")
     parser.add_argument("--eval-json", default=None)
     parser.add_argument("--traj-json", default=None)
+    parser.add_argument("--ablation-dir", action="append", default=[], metavar="LABEL=RUN_DIR")
+    parser.add_argument("--ablation-max-step", type=int, default=3000)
     parser.add_argument("--out-dir", default="docs/figures")
     return parser
 
@@ -129,6 +153,9 @@ def main(argv: list[str] | None = None) -> None:
         plot_eval(Path(args.eval_json), out_dir)
     if args.traj_json:
         plot_trajectory(Path(args.traj_json), out_dir / "trajectory.png")
+    if args.ablation_dir:
+        runs = [(item.split("=", 1)[0], Path(item.split("=", 1)[1])) for item in args.ablation_dir]
+        plot_ablations(runs, out_dir / "ablations.png", args.ablation_max_step)
 
 
 if __name__ == "__main__":
