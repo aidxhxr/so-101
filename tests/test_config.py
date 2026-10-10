@@ -24,3 +24,10 @@ def test_hardware_cameras_use_shared_resolution():
 def test_env_overrides_ports(monkeypatch):
     monkeypatch.setenv("SO101_FOLLOWER_PORT", "/dev/ttyUSB9")
     assert HardwareConfig().follower_port == "/dev/ttyUSB9"
+
+
+def test_accum_steps_defaults_to_one_and_parses():
+    parser = argparse.ArgumentParser()
+    add_dataclass_args(parser, TrainConfig)
+    assert from_args(TrainConfig, parser.parse_args([])).accum_steps == 1
+    assert from_args(TrainConfig, parser.parse_args(["--accum-steps", "2"])).accum_steps == 2

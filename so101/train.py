@@ -165,12 +165,15 @@ def train(cfg: TrainConfig, data: DatasetConfig) -> Path:
     t_data = 0.0
     t_eval = 0.0
     for step in range(start_step + 1, cfg.steps + 1):
-        td = time.perf_counter()
-        batch = preprocessor(images_to_float(next(batches), camera_keys))
-        t_data += time.perf_counter() - td
-        with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=cfg.device == "cuda"):
-            loss, _ = policy.forward(batch)
-        loss.backward()
+        loss_total = 0.0
+        for _ in range(cfg.accum_steps):
+            td = time.perf_counter()
+            batch = preprocessor(images_to_float(next(batches), camera_keys))
+            t_data += time.perf_counter() - td
+            with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=cfg.device == "cuda"):
+                loss, _ = policy.forward(batch)
+            (loss / cfg.accum_steps).backward()
+            loss_total += loss.item() / cfg.accum_steps
         grad_norm = torch.nn.utils.clip_grad_norm_(params, cfg.grad_clip)
         optimizer.step()
         scheduler.step()
@@ -180,7 +183,7 @@ def train(cfg: TrainConfig, data: DatasetConfig) -> Path:
             elapsed = time.perf_counter() - t0 - t_eval
             rec = {
                 "step": step,
-                "loss": round(loss.item(), 6),
+                "loss": round(loss_total, 6),
                 "grad_norm": round(grad_norm.item(), 4),
                 "lr": scheduler.get_last_lr()[0],
                 "step_s": round(elapsed / (step - start_step), 4),

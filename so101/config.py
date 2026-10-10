@@ -66,6 +66,7 @@ class TrainConfig:
     output_dir: str = "outputs/smolvla_so101"
     steps: int = 20_000
     batch_size: int = 64
+    accum_steps: int = 1  # micro-batches per optimizer step; effective batch = batch_size * accum_steps
     lr: float = 1e-4
     min_lr: float = 2.5e-6
     warmup_steps: int = 1_000
